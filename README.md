@@ -4,11 +4,15 @@ Command line tool to make verification of digests/checksums/hashes on downloaded
 
 ## Supported Digests
 
-* SHA-512
-* SHA-256
-* MD-5 ‡
+ <br/>Algorithm                                                          | Bit<br/>Length | Hexadecimal<br/>Length |
+ :----------------------------------------------------------------: | :--------: | :----------------: |
+ [SHA-512](https://en.wikipedia.org/wiki/SHA-2)                     |  512       |  128
+ [SHA-256](https://en.wikipedia.org/wiki/SHA-2)                     |  256       |   64
+ [SHA-1](https://en.wikipedia.org/wiki/SHA-1)                     ‡ |  160       |   40 
+ [MD5](https://en.wikipedia.org/wiki/MD5)                         ‡ |  128       |   32
+ [CRC-32](https://en.wikipedia.org/wiki/Cyclic_redundancy_check)  ‡ |   32       |    8
 
-‡ Yeah, yeah.  But some sites still use these.
+_‡ Yeah, yeah.  But some sites still use these_
 
 ## Example Usage
 
