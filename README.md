@@ -1,6 +1,6 @@
 # Digestify
 
-Command line tool to make verification of digests/checksums/hashes on downloaded files a little easier.  Just specity the file and the hash listed on the download host.  It will infer the possible digest algorithm(s) from the length.   
+Command line tool to make verification of digests/checksums/hashes on downloaded files a little easier.  Just specity the file and the hash listed on the download host.  It will infer the possible digest algorithm(s) from the length.   It will succeed
 
 ## Supported Digests
 
@@ -13,19 +13,6 @@ Command line tool to make verification of digests/checksums/hashes on downloaded
  [CRC-32](https://en.wikipedia.org/wiki/Cyclic_redundancy_check)  ‡ |   32       |    8
 
 _‡ Yeah, yeah.  But some sites still use these_
-
-## Example Usage
-
-```
-$ digestify Cargo.lock ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
-
-Verifying 'Cargo.lock' against provided digest of size 64 hex chars / 256 bits.  Candidate digest(s): SHA-256.
-
- SHA-256: MATCHES
-    Expected=ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
-      Actual=ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
-```
-
 
 ## Usage
 
@@ -45,5 +32,34 @@ ARGS:
     <FILE>      File to verify
     <DIGEST>    Digest to compare to.  Must be specified as a
                 hexadecimal string.  Case does not matter.
+```
+
+I a match is found against one of the digest algorithms, the command will succeed.  Otherwise, it will fail.
+
+## Example Usages
+
+```
+# digestify Cargo.lock ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
+
+Verifying 'Cargo.lock' against provided digest of size 64 hex chars / 256 bits.  Candidate digest(s): SHA-256.
+
+ SHA-256: MATCHES
+    Expected=ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
+      Actual=ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
+
+# echo $?
+0
+```
+
+```
+# digestify Cargo.toml f26c2e4e001349b737a3a5cc5fc4afc87b423773
+Verifying 'Cargo.toml' against provided digest of size 40 hex chars / 160 bits.  Candidate digest(s): SHA-1.
+
+ SHA-1: FAIL
+        Expected=f26c2e4e001349b737a3a5cc5fc4afc87b423773
+          Actual=a30d387b67f1e4d26fd59b3ddb94cfde58d23287
+
+# echo $?
+254
 ```
 

@@ -1,9 +1,14 @@
+//
+// Copyright 2021 3nav3
+// SPDX-License-Identifier: AGPL-3.0-only
+//
+
 use clap::{App, Arg};
 use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 mod algos;
-use crate::algos::{Algorithm, CalculatedDigest, CRC32, SHA1, MD5, SHA256, SHA512};
+use crate::algos::{Algorithm, CalculatedDigest, CRC32, MD5, SHA1, SHA256, SHA512};
 
 fn is_valid_hex_string(hash: String) -> Result<(), String> {
     match hex::decode(hash) {
@@ -122,7 +127,8 @@ fn calculate_digest<'a>(file_name: &str, algorithm: &'a Algorithm) -> Result<Cal
 }
 
 fn main() -> Result<(), Error> {
-    let supported_algorithms: Vec<Algorithm> = vec![CRC32::new(), SHA1::new(), MD5::new(), SHA256::new(), SHA512::new()];
+    let supported_algorithms: Vec<Algorithm> =
+        vec![CRC32::new(), SHA1::new(), MD5::new(), SHA256::new(), SHA512::new()];
 
     let app = config_app();
     let matches = app.get_matches();
@@ -153,7 +159,11 @@ fn main() -> Result<(), Error> {
             comparison.calculated.algorithm_name,
             if comparison.matches { "MATCHES" } else { "FAIL" }
         );
-        println!("\tExpected={}\n\t  Actual={}", provided.to_ascii_lowercase(), comparison.calculated.digest);
+        println!(
+            "\tExpected={}\n\t  Actual={}",
+            provided.to_ascii_lowercase(),
+            comparison.calculated.digest
+        );
     }
     if !has_match {
         eprintln!("\nFAIL: Provided digest doesn't match any of the candidate digest results.");

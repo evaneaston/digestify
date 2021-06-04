@@ -1,3 +1,8 @@
+//
+// Copyright 2021 3nav3
+// SPDX-License-Identifier: AGPL-3.0-only
+//
+
 use digest::Digest;
 use md5::Md5;
 use sha2::{Sha256, Sha512};
