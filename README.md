@@ -34,7 +34,7 @@ ARGS:
                 hexadecimal string.  Case does not matter.
 ```
 
-I a match is found against one of the digest algorithms, the command will succeed.  Otherwise, it will fail.
+If a match is found against one of the digest algorithms, the command will succeed.  Otherwise, it will fail.
 
 ## Example Usages
 
