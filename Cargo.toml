@@ -1,6 +1,6 @@
 [package]
 name = "digestify"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["3van3"]
 edition = "2018"
 description = "Verify a file against a digest/hash/checksum."
