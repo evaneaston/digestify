@@ -3,13 +3,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use md5::Md5;
 use crate::{Algorithm, CalculatedDigest};
 use std::io::{Read, Result};
 use digest::Digest;
 
 fn md5digest(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> {
-    let mut d = Md5::new();
+    let mut d = md5::Md5::new();
     let bytes_read = std::io::copy(read, &mut d);
     bytes_read.map(|br| CalculatedDigest {
         algorithm_name: String::from(a.name).clone(),
@@ -18,9 +17,9 @@ fn md5digest(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> {
     })
 }
 
-pub struct MD5 {}
+pub struct Md5 {}
 
-impl MD5 {
+impl Md5 {
     pub fn new() -> Algorithm<'static> {
         Algorithm {
             digest_bit_size: 128,
@@ -31,12 +30,10 @@ impl MD5 {
 }
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn md5_works() {
-        let cd = super::MD5::new().digest(&mut "ABCDE".as_bytes()).unwrap();
-        assert_eq!(cd.bytes_read, 5);
-        assert_eq!(cd.algorithm_name, "MD5");
-        assert_eq!(cd.digest, "2ecdde3959051d913f61b14579ea136d");
-    }
+#[test]
+fn md5_computes_correct_value() {
+    let cd = Md5::new().digest(&mut "heal shake auto bar blast".as_bytes()).unwrap();
+    assert_eq!(cd.bytes_read, 25);
+    assert_eq!(cd.algorithm_name, "MD5");
+    assert_eq!(cd.digest, "2722d38fcedba2f3277b736d5f41185e");
 }

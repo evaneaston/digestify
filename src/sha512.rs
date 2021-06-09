@@ -2,14 +2,12 @@
 // Copyright 2021 3nav3
 // SPDX-License-Identifier: AGPL-3.0-only
 //
-
-use sha2::Sha512;
-use crate::{Algorithm, CalculatedDigest};
+use super::{Algorithm, CalculatedDigest};
 use std::io::{Read, Result};
 use digest::Digest;
 
 fn sha512digest(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> {
-    let mut d = Sha512::new();
+    let mut d = sha2::Sha512::new();
     let bytes_read = std::io::copy(read, &mut d);
     bytes_read.map(|br| CalculatedDigest {
         algorithm_name: String::from(a.name).clone(),
@@ -18,9 +16,9 @@ fn sha512digest(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> 
     })
 }
 
-pub struct SHA512 {}
+pub struct Sha512 {}
 
-impl SHA512 {
+impl Sha512 {
     pub fn new() -> Algorithm<'static> {
         Algorithm {
             digest_bit_size: 512,
@@ -31,12 +29,10 @@ impl SHA512 {
 }
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn sha512_works() {
-        let cd = super::SHA512::new().digest(&mut "ABCDE".as_bytes()).unwrap();
-        assert_eq!(cd.bytes_read, 5);
-        assert_eq!(cd.algorithm_name, "SHA-512");
-        assert_eq!(cd.digest, "9989a8fcbc29044b5883a0a36c146fe7415b1439e995b4d806ea0af7da9ca4390eb92a604b3ecfa3d75f9911c768fbe2aecc59eff1e48dcaeca1957bdde01dfb");
-    }
+#[test]
+fn sha512_computes_correct_value() {
+    let cd = Sha512::new().digest(&mut "bomb jail carve page".as_bytes()).unwrap();
+    assert_eq!(cd.bytes_read, 20);
+    assert_eq!(cd.algorithm_name, "SHA-512");
+    assert_eq!(cd.digest, "0eab7d2bf7ca3de11946249dba2be8ddfd48dc77e976b0278b63b9a48ecd3db3a530a5c220157bba89d0bea2ed337905082575ead62ee9e4409921dbfad2ddf9");
 }

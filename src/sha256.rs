@@ -3,14 +3,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use sha2::Sha256;
 use crate::{Algorithm, CalculatedDigest};
 use std::io::{Read, Result};
 use digest::Digest;
 
 
 fn sha256(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> {
-    let mut d = Sha256::new();
+    let mut d = sha2::Sha256::new();
     let bytes_read = std::io::copy(read, &mut d);
     bytes_read.map(|br| CalculatedDigest {
         algorithm_name: String::from(a.name).clone(),
@@ -19,9 +18,9 @@ fn sha256(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> {
     })
 }
 
-pub struct SHA256 {}
+pub struct Sha256 {}
 
-impl SHA256 {
+impl Sha256 {
     pub fn new() -> Algorithm<'static> {
         Algorithm {
             digest_bit_size: 256,
@@ -32,12 +31,10 @@ impl SHA256 {
 }
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn sha256_works() {
-        let cd = super::SHA256::new().digest(&mut "ABCDE".as_bytes()).unwrap();
-        assert_eq!(cd.bytes_read, 5);
-        assert_eq!(cd.algorithm_name, "SHA-256");
-        assert_eq!(cd.digest, "f0393febe8baaa55e32f7be2a7cc180bf34e52137d99e056c817a9c07b8f239a");
-    }
+#[test]
+fn sha256_computes_correct_value() {
+    let cd = Sha256::new().digest(&mut "data jump apple expose".as_bytes()).unwrap();
+    assert_eq!(cd.bytes_read, 22);
+    assert_eq!(cd.algorithm_name, "SHA-256");
+    assert_eq!(cd.digest, "ce30b449ab38286971ea9edffb3e45891f137af0040d28463b35466a4329616d");
 }

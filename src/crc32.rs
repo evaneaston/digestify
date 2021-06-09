@@ -39,13 +39,13 @@ fn crc32digest(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> {
     })
 }
 
-pub struct CRC32 {}
+pub struct Crc32 {}
 
-impl CRC32 {
+impl Crc32 {
     pub fn new() -> super::Algorithm<'static> {
         super::Algorithm {
             digest_bit_size: 32,
-            name: "CRC32",
+            name: "CRC-32",
             digest_fn: crc32digest,
         }
     }
@@ -53,13 +53,10 @@ impl CRC32 {
 
 
 #[cfg(test)]
-mod tests {
-
-    #[test]
-    fn crc32_works() {
-        let cd = super::CRC32::new().digest(&mut "ABCDE".as_bytes()).unwrap();
-        assert_eq!(cd.bytes_read, 5);
-        assert_eq!(cd.algorithm_name, "CRC32");
-        assert_eq!(cd.digest, "72d31ad5");
-    }
+#[test]
+fn crc32_works() {
+    let cd = Crc32::new().digest(&mut "home brick limb heal prefer".as_bytes()).unwrap();
+    assert_eq!(cd.bytes_read, 27);
+    assert_eq!(cd.algorithm_name, "CRC-32");
+    assert_eq!(cd.digest, "974d7be7");
 }

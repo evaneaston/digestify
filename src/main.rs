@@ -8,11 +8,11 @@ use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use digestify::{Algorithm, CalculatedDigest};
-use digestify::sha512::SHA512;
-use digestify::sha256::SHA256;
-use digestify::sha1::SHA1;
-use digestify::md5::MD5;
-use digestify::crc32::CRC32;
+use digestify::sha512::Sha512;
+use digestify::sha256::Sha256;
+use digestify::sha1::Sha1;
+use digestify::md5::Md5;
+use digestify::crc32::Crc32;
 
 fn is_valid_hex_string(hash: String) -> Result<(), String> {
     match hex::decode(hash) {
@@ -132,7 +132,7 @@ fn calculate_digest<'a>(file_name: &str, algorithm: &'a Algorithm) -> Result<Cal
 
 fn main() -> Result<(), Error> {
     let supported_algorithms: Vec<Algorithm> =
-        vec![CRC32::new(), MD5::new(), SHA1::new(), SHA256::new(), SHA512::new()];
+        vec![Crc32::new(), Md5::new(), Sha1::new(), Sha256::new(), Sha512::new()];
 
     let app = config_app();
     let matches = app.get_matches();
