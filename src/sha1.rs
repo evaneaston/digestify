@@ -3,18 +3,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use crate::{Algorithm, CalculatedDigest};
-use std::io::{Read, Result};
+use crate::{to_calculated_digest, Algorithm, CalculatedDigest};
 use digest::Digest;
+use std::io::{Read, Result};
 
 fn sha1digest(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> {
     let mut d = sha1::Sha1::new();
     let bytes_read = std::io::copy(read, &mut d);
-    bytes_read.map(|br| CalculatedDigest {
-        algorithm_name: String::from(a.name).clone(),
-        bytes_read: br,
-        digest: hex::encode(d.finalize()),
-    })
+    to_calculated_digest(a, bytes_read, &d.finalize())
 }
 
 pub struct Sha1 {}

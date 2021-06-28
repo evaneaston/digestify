@@ -22,7 +22,7 @@ __noun__ - Command line tool to make verification of digests/checksums/hashes on
 
 ```
 $ digestify -h
-digestify 0.2.1
+digestify 0.3.0
 Verify a file against a digest/checksum/hash.
 
 USAGE:

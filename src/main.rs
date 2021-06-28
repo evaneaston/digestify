@@ -4,15 +4,15 @@
 //
 
 use clap::{App, Arg};
+use digestify::crc32::Crc32;
+use digestify::md5::Md5;
+use digestify::sha1::Sha1;
+use digestify::sha256::Sha256;
+use digestify::sha512::Sha512;
+use digestify::{Algorithm, CalculatedDigest};
 use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
-use digestify::{Algorithm, CalculatedDigest};
-use digestify::sha512::Sha512;
-use digestify::sha256::Sha256;
-use digestify::sha1::Sha1;
-use digestify::md5::Md5;
-use digestify::crc32::Crc32;
 
 fn is_valid_hex_string(hash: String) -> Result<(), String> {
     match hex::decode(hash) {

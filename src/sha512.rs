@@ -2,18 +2,14 @@
 // Copyright 2021 3nav3
 // SPDX-License-Identifier: AGPL-3.0-only
 //
-use super::{Algorithm, CalculatedDigest};
-use std::io::{Read, Result};
+use super::{to_calculated_digest, Algorithm, CalculatedDigest};
 use digest::Digest;
+use std::io::{Read, Result};
 
 fn sha512digest(a: &Algorithm, read: &mut dyn Read) -> Result<CalculatedDigest> {
     let mut d = sha2::Sha512::new();
     let bytes_read = std::io::copy(read, &mut d);
-    bytes_read.map(|br| CalculatedDigest {
-        algorithm_name: String::from(a.name).clone(),
-        bytes_read: br,
-        digest: hex::encode(d.finalize()),
-    })
+    to_calculated_digest(a, bytes_read, &d.finalize())
 }
 
 pub struct Sha512 {}

@@ -26,8 +26,16 @@ impl<'a> Algorithm<'a> {
     }
 }
 
-pub mod sha512;
-pub mod sha256;
-pub mod sha1;
-pub mod md5;
+fn to_calculated_digest(a: &Algorithm, bytes_read: Result<u64>, dr: &[u8]) -> Result<CalculatedDigest> {
+    bytes_read.map(|br| CalculatedDigest {
+        algorithm_name: String::from(a.name).clone(),
+        bytes_read: br,
+        digest: hex::encode(dr),
+    })
+}
+
 pub mod crc32;
+pub mod md5;
+pub mod sha1;
+pub mod sha256;
+pub mod sha512;
