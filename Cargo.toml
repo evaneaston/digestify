@@ -1,11 +1,11 @@
 [package]
 name = "digestify"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["3van3"]
 edition = "2018"
 description = "Verify a file against a digest/hash/checksum."
 homepage = "https://github.com/3nav3/digestify"
-repositor = "https://github.com/3nav3/digestify"
+repository = "https://github.com/3nav3/digestify"
 license = "AGPL-3.0-only"
 keywords = ["digest", "hash", "download"]
 categories = ["command-line-utilities", "cryptography"]
