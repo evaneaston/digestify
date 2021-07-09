@@ -112,8 +112,9 @@ before_cache:
 branches:
   only:
     # release tags
-    - /^v\d+\.\d+\.\d+.*$/
-    - master
+    #- /^v\d+\.\d+\.\d+.*$/
+    #- main
+    - trust-cicd
 
 notifications:
   email:
