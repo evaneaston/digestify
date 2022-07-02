@@ -1,9 +1,6 @@
-//
-// Copyright 2021 3nav3
-// SPDX-License-Identifier: AGPL-3.0-only
-//
+// SPDX-License-Identifier: Apache-2.0 OR MIT-0
 
-use clap::{App, Arg};
+use clap::Parser;
 use digestify::crc32::Crc32;
 use digestify::md5::Md5;
 use digestify::sha1::Sha1;
@@ -12,23 +9,9 @@ use digestify::sha512::Sha512;
 use digestify::{Algorithm, CalculatedDigest};
 use std::fs::File;
 use std::io::{Error, ErrorKind};
-use std::path::Path;
 
-fn is_valid_hex_string(hash: String) -> Result<(), String> {
-    match hex::decode(hash) {
-        Ok(_) => Ok(()),
-        Err(_) => Err(String::from(
-            "The provided has does not seem to be a valid hexadecimal string.",
-        )),
-    }
-}
-
-fn is_readable_file(file_name: String) -> Result<(), String> {
-    if Path::new(&file_name).exists() {
-        return Ok(());
-    }
-    Err(String::from(format!("File {} cannot be found", file_name)))
-}
+mod args;
+use args::DigestifyArgs;
 
 fn hex_len_to_size_description(hex_len: usize) -> String {
     format!("{} hex chars / {} bits", hex_len, hex_len_to_bit_len(hex_len))
@@ -42,82 +25,52 @@ fn to_algorithm_name_list(algorithms: &Vec<Algorithm>) -> String {
     algorithms.into_iter().map(|a| a.name).collect::<Vec<&str>>().join(", ")
 }
 
-fn config_app<'a>() -> App<'a, 'a> {
-    const APP_NAME: &'static str = env!("CARGO_PKG_NAME");
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-
-    App::new(APP_NAME)
-        .version(VERSION)
-        .about("Verify a file against a digest/checksum/hash.")
-        .arg(
-            Arg::with_name("FILE")
-                .help("File to verify")
-                .required(true)
-                .validator(is_readable_file),
-        )
-        .arg(
-            Arg::with_name("DIGEST")
-                .help("Digest to compare to.  Must be specified as a hexadecimal string.  Case does not matter.")
-                .required(true)
-                .validator(is_valid_hex_string),
-        )
-}
-
 fn find_candidates_based_on_digest_length<'a>(
     supported_algorithms: &'a Vec<Algorithm<'a>>,
     provided: &str,
-) -> Vec<Algorithm<'a>> {
+) -> Result<Vec<Algorithm<'a>>, Error> {
     let candidate_algorithms: Vec<Algorithm> = supported_algorithms
         .iter()
         .filter(|a| hex_len_to_bit_len(provided.len()) == a.digest_bit_size.into())
         .map(|a| *a)
         .collect();
     if candidate_algorithms.len() == 0 {
-        eprintln!(
-            "No supported algorithms for digest of size {}",
-            hex_len_to_size_description(provided.len())
-        );
-        std::process::exit(-1);
+        return Err(Error::new(
+            ErrorKind::Other,
+            format!(
+                "No supported algorithms for digest of size {}",
+                hex_len_to_size_description(provided.len())
+            ),
+        ));
     }
-    candidate_algorithms
+    Ok(candidate_algorithms)
 }
 
-fn calculate_digests(file_name: &str, candidate_algorithms: &Vec<Algorithm>) -> Vec<CalculatedDigest> {
-    let calculated_digests_results: Result<Vec<CalculatedDigest>, Error> = candidate_algorithms
+fn calculate_digests(file_name: &str, candidate_algorithms: &Vec<Algorithm>) -> Result<Vec<CalculatedDigest>, Error> {
+    candidate_algorithms
         .into_iter()
-        .map(|a| calculate_digest(file_name, &a))
-        .collect();
-    match calculated_digests_results {
-        Ok(ds) => ds,
-        Err(err) => {
-            eprintln!("Unexpected error: {}", err);
-            std::process::exit(-2);
-        }
-    }
+        .map(|a| calculate_file_digest(file_name, &a))
+        .collect()
 }
 
 struct DigestComparison<'a> {
+    provided: &'a str,
     calculated: &'a CalculatedDigest,
     matches: bool,
 }
 
-fn compare_digests<'a>(provided: &str, calculated: &'a CalculatedDigest) -> DigestComparison<'a> {
+fn compare_digests<'a>(provided: &'a str, calculated: &'a CalculatedDigest) -> DigestComparison<'a> {
     DigestComparison {
+        provided: provided,
         calculated: &calculated,
         matches: provided.eq_ignore_ascii_case(&calculated.digest),
     }
 }
 
-fn calculate_digest<'a>(file_name: &str, algorithm: &'a Algorithm) -> Result<CalculatedDigest, Error> {
+fn calculate_file_digest<'a>(file_name: &str, algorithm: &'a Algorithm) -> Result<CalculatedDigest, Error> {
     let mut file = File::open(file_name)?;
     let metadata = file.metadata()?;
-
-    let dresult = algorithm.digest(&mut file);
-    let d = match dresult {
-        Ok(digest) => digest,
-        Err(err) => return Err(err),
-    };
-
+    let d = algorithm.digest(&mut file)?;
     if metadata.len() != d.bytes_read.into() {
         let msg = format!(
             "Wasn't able to read full file length of {} bytes.  Only read {}.",
@@ -126,20 +79,19 @@ fn calculate_digest<'a>(file_name: &str, algorithm: &'a Algorithm) -> Result<Cal
         );
         return Err(Error::new(ErrorKind::Other, msg));
     }
-
     Ok(d)
 }
 
 fn main() -> Result<(), Error> {
+    let args = DigestifyArgs::parse();
+
+    let file_name = args.file_name;
+    let provided = args.digest;
+
     let supported_algorithms: Vec<Algorithm> =
         vec![Crc32::new(), Md5::new(), Sha1::new(), Sha256::new(), Sha512::new()];
 
-    let app = config_app();
-    let matches = app.get_matches();
-    let file_name = matches.value_of("FILE").unwrap();
-    let provided = matches.value_of("DIGEST").unwrap();
-
-    let candidate_algorithms = find_candidates_based_on_digest_length(&supported_algorithms, &provided);
+    let candidate_algorithms = find_candidates_based_on_digest_length(&supported_algorithms, &provided)?;
 
     println!(
         "\nVerifying '{}' against provided digest of size {}.  Candidate digest(s): {}.",
@@ -148,31 +100,30 @@ fn main() -> Result<(), Error> {
         to_algorithm_name_list(&candidate_algorithms)
     );
 
-    let calculated_digests = calculate_digests(&file_name, &candidate_algorithms);
+    let mut match_count = 0;
+    for calculated in calculate_digests(&file_name, &candidate_algorithms)? {
+        let comparison = compare_digests(&provided, &calculated);
 
-    let mut has_match = false;
-    for calculated in calculated_digests {
-        let comparison = compare_digests(provided, &calculated);
+        let match_string = match comparison.matches {
+            true => {
+                match_count += 1;
+                "PASS"
+            }
+            false => "FAIL",
+        };
 
-        if comparison.matches {
-            has_match = true;
-        }
-
-        println!(
-            "\n {}: {}    ",
-            comparison.calculated.algorithm_name,
-            if comparison.matches { "MATCHES" } else { "FAIL" }
-        );
+        println!("\n {}: {}    ", comparison.calculated.algorithm_name, match_string);
         println!(
             "\tExpected={}\n\t  Actual={}",
-            provided.to_ascii_lowercase(),
+            comparison.provided.to_ascii_lowercase(),
             comparison.calculated.digest
         );
     }
-    if !has_match {
+    if match_count == 0 {
         eprintln!("\nFAIL: Provided digest doesn't match any of the candidate digest results.");
-        std::process::exit(-2);
+        std::process::exit(2);
+    } else {
+        eprintln!("\nPASS: Provided digest matches the content.");
     }
-
     Ok(())
 }
