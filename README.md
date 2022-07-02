@@ -2,9 +2,9 @@
 
 digest·​i·​fy -| _ˈdī-ˌjest-ə-ˌfī
 
-__verb__ - Portmanteau of _digest_ and _verify_. Compute a digest of a file and verify that the digest matches a provided value.
+__noun__ - A command line tool to make verification of digests/checksums/hashes on downloaded files a little easier.  Just specity the file and the hash listed on the download host.  It will infer the possible digest algorithm(s) from the length.   It's process exit code will be indicate whether the digest matches.
 
-__noun__ - Command line tool to make verification of digests/checksums/hashes on downloaded files a little easier.  Just specity the file and the hash listed on the download host.  It will infer the possible digest algorithm(s) from the length.   It's process exit code will be indicate whether the digest matches.
+__verb__ - Portmanteau of _digest_ and _verify_. Compute a digest of a file and verify that the digest matches a provided value.
 
 
 ## Supported Digests
@@ -22,20 +22,19 @@ __noun__ - Command line tool to make verification of digests/checksums/hashes on
 
 ```
 $ digestify -h
-digestify 0.3.0
-Verify a file against a digest/checksum/hash.
+digestify 0.4.0
+Verify a file against a provided digest/hash/checksum.
 
 USAGE:
-    digestify <FILE> <DIGEST>
-
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+    digestify <file> <digest>
 
 ARGS:
-    <FILE>     File to verify
-    <DIGEST>   Digest to compare to.  Must be specified as
-               a hexadecimal string.  Case does not matter.
+    <file>      File to verify
+    <digest>    Digest to compare to, specified as a case-insensitive hexadecimal string
+
+OPTIONS:
+    -h, --help       Print help information
+    -V, --version    Print version information
 ```
 
 If a match is found against one of the digest algorithms, the command will succeed.  Otherwise, it will fail.
@@ -43,27 +42,30 @@ If a match is found against one of the digest algorithms, the command will succe
 ## Example Usages
 
 ```
-# digestify Cargo.lock ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
+# digestify Cargo.lock 19189c1219285b61ce1e95f9e4fdd5354a926075db9cf5dc62cf1801702c67d2
 
 Verifying 'Cargo.lock' against provided digest of size 64 hex chars / 256 bits.  Candidate digest(s): SHA-256.
 
- SHA-256: MATCHES
-    Expected=ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
-      Actual=ac4a0ad1af6773ce6980cc9958cfd18820275f28b8055b93e4d69688e2fd72c8
+ SHA-256: PASS
+        Expected=19189c1219285b61ce1e95f9e4fdd5354a926075db9cf5dc62cf1801702c67d2
+          Actual=19189c1219285b61ce1e95f9e4fdd5354a926075db9cf5dc62cf1801702c67d2
 
+PASS: Provided digest matches the content.
 # echo $?
 0
 ```
 
 ```
 # digestify Cargo.toml f26c2e4e001349b737a3a5cc5fc4afc87b423773
+
 Verifying 'Cargo.toml' against provided digest of size 40 hex chars / 160 bits.  Candidate digest(s): SHA-1.
 
  SHA-1: FAIL
         Expected=f26c2e4e001349b737a3a5cc5fc4afc87b423773
-          Actual=a30d387b67f1e4d26fd59b3ddb94cfde58d23287
+          Actual=95ee03e733a0111ac9d6b2073f4acec0f120fae5
 
+FAIL: Provided digest doesn't match any of the candidate digest results.
 # echo $?
-254
+2
 ```
 
