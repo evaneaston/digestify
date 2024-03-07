@@ -11,7 +11,7 @@ keywords = ["digest", "hash", "download"]
 categories = ["command-line-utilities", "cryptography"]
 
 [dependencies]
-clap = { version = "3", features = ["derive"] }
+clap = { version = "4", features = ["derive"] }
 hex = "0.4"
 sha2 = "0.10"
 sha-1 = "0.10"
