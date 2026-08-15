@@ -16,7 +16,7 @@ hex = "0.4"
 sha2 = "0.10"
 sha-1 = "0.10"
 digest = "0.10"
-md-5 = "0.10"
+md-5 = "0.11"
 crc32fast = "1.3"
 
 [profile.release]
