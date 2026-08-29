@@ -13,7 +13,7 @@ categories = ["command-line-utilities", "cryptography"]
 [dependencies]
 clap = { version = "3", features = ["derive"] }
 hex = "0.4"
-sha2 = "0.10"
+sha2 = "0.11"
 sha-1 = "0.10"
 digest = "0.10"
 md-5 = "0.10"
